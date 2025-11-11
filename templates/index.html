@@ -3,6 +3,7 @@
 {% block title %}Календарь{% endblock %}
 
 {% block content %}
+    <!-- НОВЫЙ БЛОК: Фильтры -->
     <div class="filter-container" id="filter-container">
         <strong>Фильтр:</strong>
         <!-- Чекбоксы будут сгенерированы JS -->
@@ -25,23 +26,6 @@
             <select id="month-select"></select>
             <button id="go-to-date-btn">Перейти</button>
         </div>
-    </div>
-
-    <div class="calendar-header">
-        <button id="prev-month-btn">&lt;</button>
-        <h1 id="current-month-year"></h1>
-        <button id="next-month-btn">&gt;</button>
-    </div>
-    <div class="calendar-grid" id="calendar-grid">
-        <!-- Дни недели -->
-        <div class="day-name">Пн</div>
-        <div class="day-name">Вт</div>
-        <div class="day-name">Ср</div>
-        <div class="day-name">Чт</div>
-        <div class="day-name">Пт</div>
-        <div class="day-name">Сб</div>
-        <div class="day-name">Вс</div>
-        <!-- Ячейки календаря будут сгенерированы JS -->
     </div>
 
     <!-- Модальное окно для добавления/просмотра логов -->

@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Элементы календаря
     const calendarGrid = document.getElementById('calendar-grid');
+    const dayNamesHTML = Array.from(calendarGrid.querySelectorAll('.day-name')).map(el => el.outerHTML).join('');
     const currentMonthYearEl = document.getElementById('current-month-year');
     const prevMonthBtn = document.getElementById('prev-month-btn');
     const nextMonthBtn = document.getElementById('next-month-btn');
@@ -85,55 +86,51 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderCalendar = async () => {
-        // 1. Очистка и подготовка
-        while (calendarGrid.children.length > 7) {
-            calendarGrid.removeChild(calendarGrid.lastChild);
-        }
+        // Заменяем цикл while на более надежный метод очистки
+        calendarGrid.innerHTML = dayNamesHTML;
 
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
 
         currentMonthYearEl.textContent = currentDate.toLocaleDateString('ru-RU', {
-            month: 'long',
-            year: 'numeric'
+            month: 'long', year: 'numeric'
         });
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // 2. Получение данных с учетом фильтра
+        // Получение и обработка данных (без изменений)
         const filterIDs = getSelectedFilterIDs();
         const logs = await fetchLogs(year, month + 1, filterIDs);
-
-        // 3. Анализ активных дней согласно логике фильтра
         const activeDays = new Set();
-        if (filterIDs.length > 0) { // Логика "И"
+        if (filterIDs.length > 0) {
             const logsByDate = logs.reduce((acc, log) => {
                 acc[log.date] = acc[log.date] || new Set();
                 acc[log.date].add(log.activity_id.toString());
                 return acc;
             }, {});
-
             for (const date in logsByDate) {
-                const loggedActivityIDs = logsByDate[date];
-                const allFiltersPresent = filterIDs.every(id => loggedActivityIDs.has(id));
-                if (allFiltersPresent) {
+                if (filterIDs.every(id => logsByDate[date].has(id))) {
                     activeDays.add(date);
                 }
             }
-        } else { // Логика "Все"
-            logs.forEach(log => activeDays.add(log.date));
+        } else {
+             logs.forEach(log => activeDays.add(log.date));
         }
 
-        // 4. Рендеринг сетки
+        // Рендеринг сетки
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startDay = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
 
+        // Добавляем пустые ячейки для выравнивания
         for (let i = 0; i < startDay; i++) {
-            calendarGrid.appendChild(document.createElement('div'));
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'empty-cell'; // Добавляем класс для стилизации
+            calendarGrid.appendChild(emptyCell);
         }
 
+        // Добавляем ячейки дней
         for (let day = 1; day <= daysInMonth; day++) {
             const dayCell = document.createElement('div');
             dayCell.className = 'day-cell';
@@ -143,16 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
             dayCell.dataset.date = fullDate;
             const cellDate = new Date(fullDate + 'T00:00:00');
 
-            // Логика окрашивания
+            // Окрашивание ячейки
             if (activeDays.has(fullDate)) {
                 dayCell.classList.add('active');
             } else if (cellDate < today) {
                 dayCell.classList.add('missed');
             }
-
-            // ВАЖНО: Эти две строки находятся ВНЕ условных блоков if/else,
-            // но ВНУТРИ цикла for. Это гарантирует, что каждая ячейка будет
-            // добавлена в календарь.
+            
             dayCell.addEventListener('click', () => openModal(fullDate));
             calendarGrid.appendChild(dayCell);
         }
