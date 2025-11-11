@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Коррекция для `getDay()` (делаем понедельник первым днем - 0)
         const startDay = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         // Загружаем логи для текущего месяца
         const logs = await fetchLogs(year, month + 1);
         const activeDays = new Set(logs.map(log => log.date));
@@ -60,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
             dayCell.dataset.date = fullDate;
 
             if (activeDays.has(fullDate)) {
-                dayCell.classList.add('active');
+                dayCell.classList.add('active'); // День с активностью - зеленый
+            } else if (cellDate < today) {
+                dayCell.classList.add('missed'); // Прошедший день без активности - красный
             }
 
             dayCell.addEventListener('click', () => openModal(fullDate));

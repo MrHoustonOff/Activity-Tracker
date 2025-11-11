@@ -91,16 +91,19 @@ def add_log(activity_id, date, value):
     conn.close()
     return {"success": True, "id": log_id}
 
-def get_logs_for_month(year, month):
-    """Возвращает все логи за указанный год и месяц."""
-    # Форматируем месяц, чтобы он всегда был двухзначным (например, '05')
+def get_logs_for_month(year, month, filter_ids=None):
+    """
+    Возвращает все логи за указанный год и месяц.
+    Если передан filter_ids, возвращает логи только для этих активностей.
+    """
     month_str = f"{int(month):02d}"
     date_prefix = f"{year}-{month_str}-"
     
     conn = sqlite3.connect(get_db_path())
-    # Для удобства на фронтенде будем возвращать и имя активности
     conn.row_factory = sqlite3.Row 
     cursor = conn.cursor()
+    
+    params = [date_prefix + '%']
     
     query = """
         SELECT l.id, l.activity_id, l.date, l.value, a.name as activity_name, a.value_type
@@ -108,7 +111,14 @@ def get_logs_for_month(year, month):
         JOIN activities a ON l.activity_id = a.id
         WHERE l.date LIKE ?
     """
-    cursor.execute(query, (date_prefix + '%',))
+    
+    if filter_ids:
+        # Создаем плейсхолдеры (?,?,?) для безопасной вставки
+        placeholders = ', '.join('?' for _ in filter_ids)
+        query += f" AND l.activity_id IN ({placeholders})"
+        params.extend(filter_ids)
+
+    cursor.execute(query, params)
     logs = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return logs

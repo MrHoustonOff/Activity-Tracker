@@ -168,6 +168,15 @@ button:hover {
     color: white;
 }
 
+.day-cell.missed {
+    background-color: #f8d7da; /* Светло-красный */
+    color: #721c24; /* Темно-красный текст */
+}
+.day-cell.missed:hover {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+
 /* --- СТИЛИ МОДАЛЬНОГО ОКНА --- */
 .modal {
     display: none;
