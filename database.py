@@ -148,3 +148,30 @@ def delete_log(log_id):
     conn.commit()
     conn.close()
     return {"success": True}
+
+def get_all_data_for_export():
+    """Возвращает все записи из activity_logs в формате для JSON экспорта."""
+    conn = sqlite3.connect(get_db_path())
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT
+            l.date,
+            a.name AS activity_name,
+            l.value
+        FROM activity_logs l
+        JOIN activities a ON l.activity_id = a.id
+        ORDER BY l.date ASC
+    """
+    cursor.execute(query)
+    # Преобразуем строки в словари и фильтруем value=None для чистоты JSON
+    all_data = []
+    for row in cursor.fetchall():
+        data_point = dict(row)
+        if data_point['value'] is None:
+            del data_point['value']
+        all_data.append(data_point)
+
+    conn.close()
+    return all_data

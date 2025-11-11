@@ -3,12 +3,57 @@
 import os
 import sys
 import threading
+import json
 import webview
-from flask import Flask, render_template, request, jsonify
+from pathlib import Path
+from flask import Flask, render_template, request, jsonify 
 from database import (
-    init_db, get_app_dir, add_activity, get_all_activities, 
+    init_db, get_app_dir, add_activity, get_all_activities, get_all_data_for_export,
     delete_activity, add_log, get_logs_for_month, get_logs_for_day, delete_log
 )
+
+
+class Api:
+    def export_data(self):
+        """
+        Открывает нативный диалог сохранения файла, получает данные из БД,
+        и сохраняет их в выбранный пользователем файл.
+        """
+        try:
+            # Получаем объект окна для вызова диалога
+            window = webview.windows[0] 
+            
+            # Определяем папку "Документы" для начального отображения
+            docs_path = str(Path.home() / 'Documents')
+            
+            result = window.create_file_dialog(
+                webview.SAVE_DIALOG,
+                directory=docs_path,
+                save_filename='activity_tracker_data.json'
+            )
+
+            # Если пользователь выбрал файл и нажал "Сохранить" (result не None и не пустой)
+            if result:
+                file_path = result[0] # pywebview возвращает кортеж с одним путем
+                
+                # 1. Получаем данные из БД
+                all_data = get_all_data_for_export()
+                
+                # 2. Конвертируем в JSON
+                json_data = json.dumps(all_data, ensure_ascii=False, indent=2)
+                
+                # 3. Записываем в файл
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(json_data)
+                
+                return {'status': 'success', 'path': file_path}
+            else:
+                # Пользователь закрыл диалоговое окно
+                return {'status': 'cancelled'}
+
+        except Exception as e:
+            print(f"Ошибка при экспорте: {e}")
+            return {'status': 'error', 'message': str(e)}
 
 def check_lock():
     app_dir = get_app_dir()
@@ -109,17 +154,29 @@ def api_delete_log(log_id):
     result = delete_log(log_id)
     return jsonify(result)
 
+@app.route('/export')
+def export_page():
+    """Отдает страницу Экспорта."""
+    return render_template('export.html')
+
+
 if __name__ == '__main__':
     lock_file = check_lock()
     init_db()
 
+    api = Api()
+    
     def run_flask():
         app.run(host='127.0.0.1', port=5000)
 
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.daemon = True
     flask_thread.start()
-
-    window = webview.create_window('Activity Tracker', 'http://127.0.0.1:5000')
+    
+    window = webview.create_window(
+        'Activity Tracker', 
+        'http://127.0.0.1:5000/',
+        js_api=api  # Вот магия
+    )
     window.events.closed += lambda: release_lock(lock_file)
     webview.start()

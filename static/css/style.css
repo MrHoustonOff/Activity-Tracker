@@ -274,3 +274,9 @@ button:hover {
     padding: 8px;
     font-size: 1em;
 }
+
+.status-message {
+    margin-top: 20px;
+    font-weight: bold;
+    min-height: 1.2em; /* Чтобы контейнер не "прыгал" */
+}

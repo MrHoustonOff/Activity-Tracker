@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Экспорт данных{% endblock %}
+
+{% block content %}
+    <h1>Экспорт данных</h1>
+    <p>Нажмите на кнопку ниже, чтобы скачать все ваши данные в виде одного файла формата JSON.</p>
+    <p>Этот файл можно использовать для резервного копирования или анализа в других программах.</p>
+    
+    <button id="export-btn">Экспортировать все данные в JSON</button>
+    <p id="export-status" class="status-message"></p>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/js/export.js"></script>
+{% endblock %}
