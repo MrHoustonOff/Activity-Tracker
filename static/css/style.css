@@ -229,3 +229,44 @@ button:hover {
 #modal-value-container {
     flex-grow: 1;
 }
+
+/* --- СТИЛИ ФИЛЬТРОВ --- */
+.filter-container {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+.filter-container label {
+    cursor: pointer;
+    user-select: none;
+}
+.filter-container input {
+    margin-right: 5px;
+}
+
+/* --- СТИЛИ НАВИГАЦИИ ПО ДАТЕ ("ОТКРЫВАШКА") --- */
+.nav-container {
+    margin-top: 20px;
+    text-align: center;
+}
+.date-selector {
+    margin-top: 10px;
+    padding: 15px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.date-selector.hidden {
+    display: none;
+}
+.date-selector select, .date-selector button {
+    padding: 8px;
+    font-size: 1em;
+}
