@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Управление Активностями{% endblock %}
+
+{% block content %}
+    <h1>Управление Активностями</h1>
+
+    <div class="form-container">
+        <input type="text" id="new-activity-name" placeholder="Название активности..." class="form-input">
+        <select id="new-activity-type" class="form-input">
+            <option value="checkmark">Отметка (сделал/не сделал)</option>
+            <option value="count">Количество (раз)</option>
+            <option value="duration">Время (ЧЧ:ММ:СС)</option>
+            <option value="text">Текст (заметка)</option>
+        </select>
+        <button id="add-activity-btn">Создать</button>
+    </div>
+    
+    <p id="error-message" class="error"></p>
+
+    <h2>Список активностей</h2>
+    <ul id="activity-list"></ul>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/js/activities.js"></script>
+{% endblock %}

@@ -1,30 +1,49 @@
-<!-- /ActivityTracker/templates/index.html -->
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление Активностями</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Управление Активностями</h1>
+{% block title %}Календарь{% endblock %}
 
-        <div class="form-container">
-            <input type="text" id="new-activity-name" placeholder="Введите название новой активности...">
-            <button id="add-activity-btn">Создать</button>
-        </div>
-        
-        <p id="error-message" class="error"></p>
-
-        <h2>Список активностей</h2>
-        <ul id="activity-list">
-            <!-- Активности будут загружены сюда с помощью JS -->
-        </ul>
+{% block content %}
+    <div class="calendar-header">
+        <button id="prev-month-btn">&lt;</button>
+        <h1 id="current-month-year"></h1>
+        <button id="next-month-btn">&gt;</button>
+    </div>
+    <div class="calendar-grid" id="calendar-grid">
+        <!-- Дни недели -->
+        <div class="day-name">Пн</div>
+        <div class="day-name">Вт</div>
+        <div class="day-name">Ср</div>
+        <div class="day-name">Чт</div>
+        <div class="day-name">Пт</div>
+        <div class="day-name">Сб</div>
+        <div class="day-name">Вс</div>
+        <!-- Ячейки календаря будут сгенерированы JS -->
     </div>
 
-    <script src="/static/js/main.js"></script>
-</body>
-</html>
+    <!-- Модальное окно для добавления/просмотра логов -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-date"></h2>
+            
+            <div class="modal-section">
+                <h3>Добавить запись</h3>
+                <div class="form-container">
+                    <select id="modal-activity-select" class="form-input"></select>
+                    <div id="modal-value-container"></div> <!-- Контейнер для поля ввода -->
+                    <button id="save-log-btn">Сохранить</button>
+                </div>
+                 <p id="modal-error" class="error"></p>
+            </div>
+
+            <div class="modal-section">
+                <h3>Записи за этот день</h3>
+                <ul id="day-logs-list"></ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/js/calendar.js"></script>
+{% endblock %}
