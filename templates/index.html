@@ -1,0 +1,30 @@
+<!-- /ActivityTracker/templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление Активностями</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Управление Активностями</h1>
+
+        <div class="form-container">
+            <input type="text" id="new-activity-name" placeholder="Введите название новой активности...">
+            <button id="add-activity-btn">Создать</button>
+        </div>
+        
+        <p id="error-message" class="error"></p>
+
+        <h2>Список активностей</h2>
+        <ul id="activity-list">
+            <!-- Активности будут загружены сюда с помощью JS -->
+        </ul>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
