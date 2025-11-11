@@ -17,13 +17,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const dayLogsList = document.getElementById('day-logs-list');
     const modalError = document.getElementById('modal-error');
     
+    const filterContainer = document.getElementById('filter-container');
+
+    // Элементы навигации по дате
+    const toggleNavBtn = document.getElementById('toggle-nav-btn');
+    const dateSelector = document.getElementById('date-selector');
+    const yearSelect = document.getElementById('year-select');
+    const monthSelect = document.getElementById('month-select');
+    const goToDateBtn = document.getElementById('go-to-date-btn');
+
     let currentDate = new Date();
     let activitiesCache = []; // Кэш для списка активностей
 
     // --- ЛОГИКА КАЛЕНДАРЯ ---
 
+    const renderFilterControls = async () => {
+        if (activitiesCache.length === 0) {
+            const response = await fetch('/api/activities');
+            activitiesCache = await response.json();
+        }
+
+        filterContainer.innerHTML = '<strong>Фильтр:</strong>'; // Очищаем
+        
+        // Чекбокс "Все"
+        const allLabel = document.createElement('label');
+        allLabel.innerHTML = '<input type="checkbox" value="all" checked> Все';
+        filterContainer.appendChild(allLabel);
+
+        // Чекбоксы для каждой активности
+        activitiesCache.forEach(act => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${act.id}"> ${act.name}`;
+            filterContainer.appendChild(label);
+        });
+
+        // Добавляем слушатель событий на весь контейнер
+        filterContainer.addEventListener('change', handleFilterChange);
+    };
+    
+    const handleFilterChange = (e) => {
+        const allCheckbox = filterContainer.querySelector('input[value="all"]');
+        const activityCheckboxes = filterContainer.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+
+        // Логика работы чекбокса "Все"
+        if (e.target.value === 'all') {
+            activityCheckboxes.forEach(cb => cb.checked = false);
+        } else if (e.target.checked) {
+            allCheckbox.checked = false;
+        }
+
+        // Если ни один чекбокс не выбран, выбираем "Все"
+        const anyChecked = Array.from(filterContainer.querySelectorAll('input[type="checkbox"]')).some(cb => cb.checked);
+        if (!anyChecked) {
+            allCheckbox.checked = true;
+        }
+
+        renderCalendar(); // Перерисовываем календарь с новыми фильтрами
+    };
+
+    const getSelectedFilterIDs = () => {
+        const allCheckbox = filterContainer.querySelector('input[value="all"]');
+        if (allCheckbox.checked) {
+            return []; // Пустой массив означает "без фильтра"
+        }
+        return Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:not([value="all"]):checked'))
+            .map(cb => cb.value);
+    };
+
     const renderCalendar = async () => {
-        // Очищаем старую сетку (кроме названий дней недели)
+        // 1. Очистка и подготовка
         while (calendarGrid.children.length > 7) {
             calendarGrid.removeChild(calendarGrid.lastChild);
         }
@@ -36,38 +98,61 @@ document.addEventListener('DOMContentLoaded', () => {
             year: 'numeric'
         });
 
-        const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0-Вс, 1-Пн
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
-        // Коррекция для `getDay()` (делаем понедельник первым днем - 0)
-        const startDay = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
-
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Загружаем логи для текущего месяца
-        const logs = await fetchLogs(year, month + 1);
-        const activeDays = new Set(logs.map(log => log.date));
+        // 2. Получение данных с учетом фильтра
+        const filterIDs = getSelectedFilterIDs();
+        const logs = await fetchLogs(year, month + 1, filterIDs);
 
-        // Добавляем пустые ячейки для дней предыдущего месяца
+        // 3. Анализ активных дней согласно логике фильтра
+        const activeDays = new Set();
+        if (filterIDs.length > 0) { // Логика "И"
+            const logsByDate = logs.reduce((acc, log) => {
+                acc[log.date] = acc[log.date] || new Set();
+                acc[log.date].add(log.activity_id.toString());
+                return acc;
+            }, {});
+
+            for (const date in logsByDate) {
+                const loggedActivityIDs = logsByDate[date];
+                const allFiltersPresent = filterIDs.every(id => loggedActivityIDs.has(id));
+                if (allFiltersPresent) {
+                    activeDays.add(date);
+                }
+            }
+        } else { // Логика "Все"
+            logs.forEach(log => activeDays.add(log.date));
+        }
+
+        // 4. Рендеринг сетки
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startDay = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
+
         for (let i = 0; i < startDay; i++) {
             calendarGrid.appendChild(document.createElement('div'));
         }
 
-        // Добавляем ячейки дней текущего месяца
         for (let day = 1; day <= daysInMonth; day++) {
             const dayCell = document.createElement('div');
             dayCell.className = 'day-cell';
             dayCell.textContent = day;
+            
             const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             dayCell.dataset.date = fullDate;
+            const cellDate = new Date(fullDate + 'T00:00:00');
 
+            // Логика окрашивания
             if (activeDays.has(fullDate)) {
-                dayCell.classList.add('active'); // День с активностью - зеленый
+                dayCell.classList.add('active');
             } else if (cellDate < today) {
-                dayCell.classList.add('missed'); // Прошедший день без активности - красный
+                dayCell.classList.add('missed');
             }
 
+            // ВАЖНО: Эти две строки находятся ВНЕ условных блоков if/else,
+            // но ВНУТРИ цикла for. Это гарантирует, что каждая ячейка будет
+            // добавлена в календарь.
             dayCell.addEventListener('click', () => openModal(fullDate));
             calendarGrid.appendChild(dayCell);
         }
@@ -164,8 +249,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ВЗАИМОДЕЙСТВИЕ С API ---
 
-    const fetchLogs = async (year, month) => {
-        const response = await fetch(`/api/logs/${year}/${month}`);
+    const fetchLogs = async (year, month, filterIDs = []) => {
+        let url = `/api/logs/${year}/${month}`;
+        if (filterIDs.length > 0) {
+            url += `?filter_ids=${filterIDs.join(',')}`;
+        }
+        const response = await fetch(url);
         return await response.json();
     };
 
@@ -205,7 +294,49 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetch(`/api/log/${logId}`, { method: 'DELETE' });
     };
 
-    // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
+    const populateDateSelector = () => {
+        const currentYear = new Date().getFullYear();
+        // Годы: текущий +/- 5 лет
+        for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelect.appendChild(option);
+        }
+        // Месяцы
+        const months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = month;
+            monthSelect.appendChild(option);
+        });
+    };
+    
+    toggleNavBtn.addEventListener('click', () => {
+        dateSelector.classList.toggle('hidden');
+        if (!dateSelector.classList.contains('hidden')) {
+            // Устанавливаем текущие значения в селекторы
+            yearSelect.value = currentDate.getFullYear();
+            monthSelect.value = currentDate.getMonth();
+        }
+    });
+
+    goToDateBtn.addEventListener('click', () => {
+        const newYear = parseInt(yearSelect.value);
+        const newMonth = parseInt(monthSelect.value);
+        currentDate = new Date(newYear, newMonth, 1);
+        renderCalendar();
+        dateSelector.classList.add('hidden');
+    });
+
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+        const init = async () => {
+        await renderFilterControls();
+        populateDateSelector();
+        await renderCalendar();
+    };
+
 
     prevMonthBtn.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
@@ -233,5 +364,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- ИНИЦИАЛИЗАЦИЯ ---
-    renderCalendar();
+    init();
 });
