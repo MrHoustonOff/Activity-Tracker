@@ -77,3 +77,64 @@ def delete_activity(activity_id):
     cursor.execute("DELETE FROM activities WHERE id = ?", (activity_id,))
     conn.commit()
     conn.close()
+    
+def add_log(activity_id, date, value):
+    """Добавляет запись в журнал активностей."""
+    conn = sqlite3.connect(get_db_path())
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO activity_logs (activity_id, date, value) VALUES (?, ?, ?)",
+        (activity_id, date, value)
+    )
+    conn.commit()
+    log_id = cursor.lastrowid
+    conn.close()
+    return {"success": True, "id": log_id}
+
+def get_logs_for_month(year, month):
+    """Возвращает все логи за указанный год и месяц."""
+    # Форматируем месяц, чтобы он всегда был двухзначным (например, '05')
+    month_str = f"{int(month):02d}"
+    date_prefix = f"{year}-{month_str}-"
+    
+    conn = sqlite3.connect(get_db_path())
+    # Для удобства на фронтенде будем возвращать и имя активности
+    conn.row_factory = sqlite3.Row 
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT l.id, l.activity_id, l.date, l.value, a.name as activity_name, a.value_type
+        FROM activity_logs l
+        JOIN activities a ON l.activity_id = a.id
+        WHERE l.date LIKE ?
+    """
+    cursor.execute(query, (date_prefix + '%',))
+    logs = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return logs
+
+def get_logs_for_day(date):
+    """Возвращает все логи за конкретный день."""
+    conn = sqlite3.connect(get_db_path())
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT l.id, l.activity_id, l.value, a.name as activity_name
+        FROM activity_logs l
+        JOIN activities a ON l.activity_id = a.id
+        WHERE l.date = ?
+    """
+    cursor.execute(query, (date,))
+    logs = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return logs
+
+def delete_log(log_id):
+    """Удаляет конкретную запись из журнала."""
+    conn = sqlite3.connect(get_db_path())
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM activity_logs WHERE id = ?", (log_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True}
