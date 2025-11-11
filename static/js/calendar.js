@@ -85,6 +85,32 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(cb => cb.value);
     };
 
+    const applyTimeMask = (input) => {
+        input.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, ''); // Удаляем все нецифровые символы
+            let maskedValue = '';
+            if (value.length > 0) {
+                maskedValue += value.substring(0, 2);
+            }
+            if (value.length > 2) {
+                maskedValue += ':' + value.substring(2, 4);
+            }
+            if (value.length > 4) {
+                maskedValue += ':' + value.substring(4, 6);
+            }
+            e.target.value = maskedValue;
+        });
+        // Дополнительно форматируем при потере фокуса
+        input.addEventListener('blur', (e) => {
+            const parts = e.target.value.split(':');
+            const formattedParts = parts.map(part => part.padStart(2, '0'));
+            while (formattedParts.length < 3) {
+                formattedParts.push('00');
+            }
+            e.target.value = formattedParts.slice(0, 3).join(':');
+        });
+    };
+
     const renderCalendar = async () => {
         // Заменяем цикл while на более надежный метод очистки
         calendarGrid.innerHTML = dayNamesHTML;
@@ -201,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.type = 'text';
                 input.placeholder = 'ЧЧ:ММ:СС';
                 input.className = 'form-input';
+                applyTimeMask(input); 
                 break;
             case 'text':
                 input = document.createElement('input');
@@ -212,8 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
             default:
                 return;
         }
-        input.id = 'modal-value-input';
-        valueContainer.appendChild(input);
+        if (input) { // Убедимся, что input был создан
+            input.id = 'modal-value-input';
+            valueContainer.appendChild(input);
+        }
     };
 
     const renderDayLogs = async (date) => {

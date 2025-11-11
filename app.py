@@ -5,6 +5,7 @@ import sys
 import threading
 import json
 import webview
+import re 
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify 
 from database import (
@@ -143,10 +144,21 @@ def api_add_log():
     activity_id = data.get('activity_id')
     date = data.get('date')
     value = data.get('value')
+    
+    # Проверяем тип активности, чтобы знать, нужно ли валидировать 'value'
+    activity = next((act for act in get_all_activities() if act['id'] == int(activity_id)), None)
+
+    if activity and activity['value_type'] == 'duration' and value:
+        # Проверяем, что значение соответствует формату ЧЧ:ММ:СС
+        if not re.match(r'^\d{2}:\d{2}:\d{2}$', value):
+            return jsonify({"success": False, "error": "Неверный формат времени. Используйте ЧЧ:ММ:СС."}), 400
+
     if not all([activity_id, date]):
         return jsonify({"success": False, "error": "Некорректные данные."}), 400
+        
     result = add_log(activity_id, date, value)
     return jsonify(result), 201
+
 
 @app.route('/api/log/<int:log_id>', methods=['DELETE'])
 def api_delete_log(log_id):
