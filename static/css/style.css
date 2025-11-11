@@ -1,282 +1,187 @@
-/* /ActivityTracker/static/css/style.css */
+:root {
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Светлая тема (по умолчанию) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #f1f3f5;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --accent-color: #007bff;
+    --accent-color-hover: #0056b3;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --danger-color-hover: #c82333;
+    --missed-bg: #f8d7da;
+    --missed-text: #721c24;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Темная тема */
+body.dark-theme {
+    --bg-primary: #212529;
+    --bg-secondary: #343a40;
+    --bg-tertiary: #495057;
+    --text-primary: #f8f9fa;
+    --text-secondary: #adb5bd;
+    --border-color: #495057;
+    --accent-color: #0d6efd;
+    --accent-color-hover: #0b5ed7;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --danger-color-hover: #bb2d3b;
+    --missed-bg: #4b1d21;
+    --missed-text: #f5c6cb;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* --- 2. Базовые Стили и Сбросы --- */
+* { box-sizing: border-box; }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    font-family: var(--font-family);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     margin: 0;
     padding: 20px;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .container {
-    max-width: 700px;
+    max-width: 900px;
     margin: 0 auto;
-    background-color: #fff;
+    background-color: var(--bg-primary);
     padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    border: 1px solid var(--border-color);
 }
 
-h1, h2 {
-    color: #444;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
+h1, h2, h3 { color: var(--text-primary); }
+h1 { border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+h2 { margin-top: 30px; }
 
-.form-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    align-items: center;
-}
-
-.form-input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-#new-activity-name {
-    flex: 2 1 0; /* Больше места для имени */
-}
-
-#new-activity-type {
-    flex: 1 1 0; /* Меньше места для типа */
-}
-
-button {
-    padding: 10px 15px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-#activity-list {
-    list-style-type: none;
-    padding: 0;
-}
-
-#activity-list li {
+/* --- 3. Навигация и Переключатель Темы --- */
+.main-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid #eee;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 5px;
+    box-shadow: 0 2px 5px var(--shadow-color);
 }
-
-/* Новые стили для отображения имени и типа */
-.activity-name {
+.nav-links { display: flex; }
+.nav-link {
+    padding: 10px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 6px;
     font-weight: 500;
 }
+.nav-link:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+.nav-link.active { color: #fff; background-color: var(--accent-color); }
 
-.activity-type {
-    font-size: 0.85em;
-    color: #666;
-    background-color: #eee;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 10px;
+#theme-toggle {
+    background: none; border: none; cursor: pointer;
+    font-size: 24px; padding: 5px 15px;
+    color: var(--text-secondary);
+    transition: color 0.2s;
 }
+#theme-toggle:hover { color: var(--text-primary); }
 
-#activity-list li:last-child {
-    border-bottom: none;
+/* --- 4. Элементы Форм --- */
+.form-container { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.form-input, select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
+.form-input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 25%, transparent);
+}
+button {
+    padding: 10px 15px; border: none;
+    background-color: var(--accent-color);
+    color: white; border-radius: 6px;
+    cursor: pointer; font-size: 16px;
+    transition: background-color 0.2s;
+}
+button:hover { background-color: var(--accent-color-hover); }
+button:disabled { background-color: var(--text-secondary); cursor: not-allowed; }
+.delete-btn { background-color: var(--danger-color); }
+.delete-btn:hover { background-color: var(--danger-color-hover); }
 
-.delete-btn {
-    background-color: #dc3545;
-}
-
-.delete-btn:hover {
-    background-color: #c82333;
-}
-
-.error {
-    color: #dc3545;
-    margin-bottom: 15px;
-    min-height: 1.2em;
-}
-
-/* --- СТИЛИ НАВИГАЦИИ --- */
-.main-nav {
-    background-color: #333;
-    padding: 0 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-}
-.nav-link {
-    display: inline-block;
-    padding: 15px 20px;
-    color: #f2f2f2;
-    text-decoration: none;
-    transition: background-color 0.3s;
-}
-.nav-link:hover {
-    background-color: #555;
-}
-.nav-link.active {
-    background-color: #007bff;
-}
-
-/* --- СТИЛИ КАЛЕНДАРЯ --- */
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.calendar-header h1 {
-    margin: 0;
-    border: none;
-    font-size: 1.5em;
-}
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-}
+/* --- 5. Календарь --- */
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.calendar-header h1 { border: none; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
 .day-name, .day-cell, .empty-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 60px;
-    background-color: #f0f0f0;
-    border-radius: 4px;
+    display: flex; justify-content: center; align-items: center;
+    height: 60px; border-radius: 6px;
 }
-/* Добавьте этот новый блок */
-.empty-cell {
-    background-color: transparent;
-}
-.day-name {
-    font-weight: bold;
-    background-color: transparent;
-}
+.day-name { font-weight: bold; color: var(--text-secondary); }
 .day-cell {
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    background-color: var(--bg-tertiary);
+    cursor: pointer; transition: all 0.2s ease;
 }
-.day-cell:hover {
-    background-color: #007bff;
-    color: white;
-}
-.day-cell.active {
-    background-color: #28a745; /* Зеленый цвет для активных дней */
-    color: white;
-}
+.day-cell:hover { transform: scale(1.05); box-shadow: 0 0 10px var(--shadow-color); }
+.day-cell.active { background-color: var(--success-color); color: #fff; }
+.day-cell.missed { background-color: var(--missed-bg); color: var(--missed-text); }
 
-.day-cell.missed {
-    background-color: #f8d7da; /* Светло-красный */
-    color: #721c24; /* Темно-красный текст */
-}
-.day-cell.missed:hover {
-    background-color: #f5c6cb;
-    color: #721c24;
-}
-
-/* --- СТИЛИ МОДАЛЬНОГО ОКНА --- */
+/* --- 6. Модальное Окно --- */
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    display: none; position: fixed; z-index: 1000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
     overflow: auto;
+    animation: fadeIn 0.3s ease;
 }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 25px;
-    border-radius: 8px;
-    max-width: 500px;
-    position: relative;
+    background-color: var(--bg-primary);
+    margin: 10% auto; padding: 25px 30px;
+    border-radius: 12px; max-width: 550px;
+    position: relative; border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px var(--shadow-color);
+    animation: slideIn 0.3s ease;
 }
+@keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
+    position: absolute; top: 15px; right: 20px;
+    color: var(--text-secondary); font-size: 28px;
+    font-weight: bold; cursor: pointer; transition: color 0.2s;
 }
-.modal-section {
-    margin-top: 20px;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
-#day-logs-list {
-    list-style-type: none;
-    padding: 0;
-}
+.close-btn:hover { color: var(--text-primary); }
+.modal-section { margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px; }
 #day-logs-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px; border-radius: 6px; transition: background-color 0.2s;
 }
-.delete-btn-small {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8em;
-}
-#modal-value-container {
-    flex-grow: 1;
-}
+#day-logs-list li:hover { background-color: var(--bg-secondary); }
+.delete-btn-small { padding: 4px 8px; font-size: 0.8em; }
 
-/* --- СТИЛИ ФИЛЬТРОВ --- */
-.filter-container {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: center;
+/* --- 7. Прочие Стили --- */
+.error { color: var(--danger-color); min-height: 1.2em; }
+.status-message { margin-top: 20px; font-weight: bold; min-height: 1.2em; }
+.filter-container { background-color: var(--bg-secondary); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1px solid var(--border-color); }
+#activity-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px; border-bottom: 1px solid var(--border-color);
 }
-.filter-container label {
-    cursor: pointer;
-    user-select: none;
-}
-.filter-container input {
-    margin-right: 5px;
-}
-
-/* --- СТИЛИ НАВИГАЦИИ ПО ДАТЕ ("ОТКРЫВАШКА") --- */
-.nav-container {
-    margin-top: 20px;
-    text-align: center;
-}
-.date-selector {
-    margin-top: 10px;
-    padding: 15px;
-    background-color: #f1f1f1;
-    border-radius: 8px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-.date-selector.hidden {
-    display: none;
-}
-.date-selector select, .date-selector button {
-    padding: 8px;
-    font-size: 1em;
-}
-
-.status-message {
-    margin-top: 20px;
-    font-weight: bold;
-    min-height: 1.2em; /* Чтобы контейнер не "прыгал" */
+.activity-type {
+    font-size: 0.85em; color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
+    padding: 2px 6px; border-radius: 4px; margin-left: 10px;
 }
