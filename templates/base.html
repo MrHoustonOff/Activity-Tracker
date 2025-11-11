@@ -1,23 +1,20 @@
+<!-- /ActivityTracker/templates/base.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Activity Tracker{% endblock %}</title>
+    <!-- УДАЛЯЕМ СКРИПТ ТЕМЫ -->
     <link rel="stylesheet" href="/static/css/style.css">
-    <!-- НОВЫЙ СКРИПТ: подключаем в head, чтобы избежать "вспышки" неправильной темы -->
-    <script src="/static/js/theme.js" defer></script>
 </head>
 <body>
     <nav class="main-nav">
-        <!-- Оборачиваем ссылки в div для лучшего позиционирования -->
         <div class="nav-links">
             <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Календарь</a>
             <a href="/activities" class="nav-link {% if request.path == '/activities' %}active{% endif %}">Управление Активностями</a>
             <a href="/export" class="nav-link {% if request.path == '/export' %}active{% endif %}">Экспорт</a>
         </div>
-        <!-- НОВАЯ КНОПКА: Переключатель темы -->
-        <button id="theme-toggle" title="Сменить тему">🌙</button>
     </nav>
     <div class="container">
         {% block content %}{% endblock %}
