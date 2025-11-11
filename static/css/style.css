@@ -104,3 +104,119 @@ button:hover {
     margin-bottom: 15px;
     min-height: 1.2em;
 }
+
+/* --- СТИЛИ НАВИГАЦИИ --- */
+.main-nav {
+    background-color: #333;
+    padding: 0 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+.nav-link {
+    display: inline-block;
+    padding: 15px 20px;
+    color: #f2f2f2;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+.nav-link:hover {
+    background-color: #555;
+}
+.nav-link.active {
+    background-color: #007bff;
+}
+
+/* --- СТИЛИ КАЛЕНДАРЯ --- */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.calendar-header h1 {
+    margin: 0;
+    border: none;
+    font-size: 1.5em;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+.day-name, .day-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
+.day-name {
+    font-weight: bold;
+    background-color: transparent;
+}
+.day-cell {
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+.day-cell:hover {
+    background-color: #007bff;
+    color: white;
+}
+.day-cell.active {
+    background-color: #28a745; /* Зеленый цвет для активных дней */
+    color: white;
+}
+
+/* --- СТИЛИ МОДАЛЬНОГО ОКНА --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow: auto;
+}
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 8px;
+    max-width: 500px;
+    position: relative;
+}
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.modal-section {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+#day-logs-list {
+    list-style-type: none;
+    padding: 0;
+}
+#day-logs-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.delete-btn-small {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+#modal-value-container {
+    flex-grow: 1;
+}
