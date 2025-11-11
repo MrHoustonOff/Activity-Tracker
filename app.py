@@ -5,7 +5,10 @@ import sys
 import threading
 import webview
 from flask import Flask, render_template, request, jsonify
-from database import init_db, get_app_dir, add_activity, get_all_activities, delete_activity
+from database import (
+    init_db, get_app_dir, add_activity, get_all_activities, 
+    delete_activity, add_log, get_logs_for_month, get_logs_for_day, delete_log
+)
 
 def check_lock():
     app_dir = get_app_dir()
@@ -62,6 +65,39 @@ def api_add_activity():
 def api_delete_activity(activity_id):
     delete_activity(activity_id)
     return jsonify({"success": True, "message": "Активность удалена."})
+
+@app.route('/api/logs/<int:year>/<int:month>', methods=['GET'])
+def api_get_logs_for_month(year, month):
+    """API: Получить все записи за месяц."""
+    logs = get_logs_for_month(year, month)
+    return jsonify(logs)
+
+@app.route('/api/logs_by_day', methods=['GET'])
+def api_get_logs_for_day():
+    """API: Получить все записи за конкретный день."""
+    date = request.args.get('date')
+    if not date:
+        return jsonify({"error": "Параметр 'date' обязателен"}), 400
+    logs = get_logs_for_day(date)
+    return jsonify(logs)
+
+@app.route('/api/log', methods=['POST'])
+def api_add_log():
+    """API: Добавить запись в журнал."""
+    data = request.get_json()
+    activity_id = data.get('activity_id')
+    date = data.get('date')
+    value = data.get('value')
+    if not all([activity_id, date]):
+        return jsonify({"success": False, "error": "Некорректные данные."}), 400
+    result = add_log(activity_id, date, value)
+    return jsonify(result), 201
+
+@app.route('/api/log/<int:log_id>', methods=['DELETE'])
+def api_delete_log(log_id):
+    """API: Удалить конкретную запись."""
+    result = delete_log(log_id)
+    return jsonify(result)
 
 if __name__ == '__main__':
     lock_file = check_lock()
