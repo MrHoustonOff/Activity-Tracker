@@ -1,10 +1,7 @@
-# /ActivityTracker/database.py
-
 import sqlite3
 import os
 from pathlib import Path
 
-# --- Этап 0: Ядро - Логика хранения данных ---
 def get_app_dir():
     """Возвращает путь к директории данных приложения в зависимости от ОС."""
     if os.name == 'nt':  # Windows
@@ -25,18 +22,17 @@ def init_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Включаем поддержку внешних ключей для каскадного удаления
     cursor.execute("PRAGMA foreign_keys = ON;")
 
-    # Создание таблицы активностей
+    # Добавлено поле value_type, которое будет хранить тип ('checkmark', 'count', 'duration', 'text')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
+            name TEXT NOT NULL UNIQUE,
+            value_type TEXT NOT NULL 
         )
     ''')
 
-    # Создание таблицы логов
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS activity_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,14 +47,12 @@ def init_db():
     conn.close()
     print(f"База данных инициализирована по пути: {db_path}")
 
-# --- Этап 1: Модуль 2 - Функции для управления активностями ---
-
-def add_activity(name):
-    """Добавляет новую активность в базу данных."""
+def add_activity(name, value_type):
+    """Добавляет новую активность с указанным типом значения в базу данных."""
     conn = sqlite3.connect(get_db_path())
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO activities (name) VALUES (?)", (name,))
+        cursor.execute("INSERT INTO activities (name, value_type) VALUES (?, ?)", (name, value_type))
         conn.commit()
         return {"success": True, "id": cursor.lastrowid}
     except sqlite3.IntegrityError:
@@ -67,11 +61,11 @@ def add_activity(name):
         conn.close()
 
 def get_all_activities():
-    """Возвращает список всех активностей."""
+    """Возвращает список всех активностей, включая их тип."""
     conn = sqlite3.connect(get_db_path())
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM activities ORDER BY name ASC")
-    activities = [{"id": row[0], "name": row[1]} for row in cursor.fetchall()]
+    cursor.execute("SELECT id, name, value_type FROM activities ORDER BY name ASC")
+    activities = [{"id": row[0], "name": row[1], "value_type": row[2]} for row in cursor.fetchall()]
     conn.close()
     return activities
 
@@ -79,7 +73,7 @@ def delete_activity(activity_id):
     """Удаляет активность и все связанные с ней логи (каскадно)."""
     conn = sqlite3.connect(get_db_path())
     cursor = conn.cursor()
-    cursor.execute("PRAGMA foreign_keys = ON;") # Важно для каскадного удаления
+    cursor.execute("PRAGMA foreign_keys = ON;")
     cursor.execute("DELETE FROM activities WHERE id = ?", (activity_id,))
     conn.commit()
     conn.close()
