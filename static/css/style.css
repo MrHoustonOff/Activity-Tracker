@@ -1,3 +1,5 @@
+/* /ActivityTracker/static/css/style.css */
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f4f9;
@@ -25,14 +27,22 @@ h1, h2 {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    align-items: center;
 }
 
-#new-activity-name {
-    flex-grow: 1;
+.form-input {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
+}
+
+#new-activity-name {
+    flex: 2 1 0; /* Больше места для имени */
+}
+
+#new-activity-type {
+    flex: 1 1 0; /* Меньше места для типа */
 }
 
 button {
@@ -61,6 +71,20 @@ button:hover {
     align-items: center;
     padding: 12px;
     border-bottom: 1px solid #eee;
+}
+
+/* Новые стили для отображения имени и типа */
+.activity-name {
+    font-weight: 500;
+}
+
+.activity-type {
+    font-size: 0.85em;
+    color: #666;
+    background-color: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 10px;
 }
 
 #activity-list li:last-child {
